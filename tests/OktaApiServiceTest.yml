@@ -1,0 +1,11 @@
+Member:
+  member1:
+    FirstName: Member
+    Surname: One
+    Email: user1@test.com
+    IsOktaMember: true
+  member2:
+    FirstName: Member
+    Surname: Two
+    Email: membertwo@example.org
+    IsOktaMember: true

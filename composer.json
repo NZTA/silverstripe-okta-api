@@ -1,0 +1,20 @@
+{
+    "name": "nzta/silverstripe-okta-api",
+    "description": "Integration with the Okta API",
+    "type": "silverstripe-module",
+    "homepage": "https://github.com/NZTA/silverstripe-okta-api",
+    "keywords": ["silverstripe", "okta", "cms"],
+    "license": "BSD-3-Clause",
+    "support": {
+        "issues": "https://github.com/NZTA/silverstripe-okta-api/issues"
+    },
+    "require": {
+        "silverstripe/framework": "~3.4",
+        "silverstripe/cms": "~3.4",
+        "silverstripe/queuedjobs": "^2.9",
+        "guzzlehttp/guzzle": "^6.2"
+    },
+    "require-dev": {
+        "phpunit/PHPUnit": "~3.7"
+    }
+}

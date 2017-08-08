@@ -1,0 +1,13 @@
+---
+Name: extensionsconfig-okta-api
+After:
+  - 'framework/*'
+  - 'cms/*'
+---
+Member:
+  extensions:
+    - OktaProfileMemberExtension
+
+Group:
+  extensions:
+    - OktaGroupExtension
