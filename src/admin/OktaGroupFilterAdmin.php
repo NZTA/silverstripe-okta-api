@@ -1,8 +1,11 @@
 <?php
 
+namespace NZTA\OktaAPI\Admin;
+
+use SilverStripe\Admin\ModelAdmin;
+
 class OktaGroupFilterAdmin extends ModelAdmin
 {
-
     /**
      * @var string
      */

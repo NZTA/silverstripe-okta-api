@@ -1,8 +1,14 @@
 <?php
 
+namespace NZTA\OktaAPI\Extensions;
+
+use SilverStripe\ORM\DataExtension;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\Forms\CheckboxField_Readonly;
+
 class OktaGroupExtension extends DataExtension
 {
-
     /**
      * @var array
      */
@@ -13,7 +19,8 @@ class OktaGroupExtension extends DataExtension
     ];
 
     /**
-     * @return FieldList
+     * @param FieldList $fields
+     * @return void
      */
     public function updateCMSFields(FieldList $fields)
     {
@@ -26,5 +33,4 @@ class OktaGroupExtension extends DataExtension
             ]
         );
     }
-
 }

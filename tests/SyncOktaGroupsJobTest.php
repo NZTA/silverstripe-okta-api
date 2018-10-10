@@ -1,5 +1,15 @@
 <?php
 
+namespace NZTA\OktaAPI\Tests;
+
+use NZTA\OktaAPI\Jobs\SyncOktaGroupsJob;
+use NZTA\OktaAPI\Model\OktaGroupFilter;
+use ReflectionMethod;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Dev\SapphireTest;
+use NZTA\OktaAPI\Services\OktaService;
+use SilverStripe\Security\Group;
+
 class SyncOktaGroupsJobTest extends SapphireTest
 {
 
@@ -16,14 +26,9 @@ class SyncOktaGroupsJobTest extends SapphireTest
      */
     private $OktaService = null;
 
-    /**
-     * Ensuring we have hamcrest available for {@link Phockito}
-     */
     public function setUpOnce()
     {
         parent::setUpOnce();
-
-        Phockito::include_hamcrest();
     }
 
     /**
@@ -33,19 +38,19 @@ class SyncOktaGroupsJobTest extends SapphireTest
     {
         parent::setUp();
 
-        $this->OktaService = Injector::inst()->get('OktaService');
+        $this->OktaService = Injector::inst()->get(OktaService::class);
         $this->OktaService->OktaGateway = Injector::inst()
-            ->get('MockOktaApiService')
+            ->get(MockOktaApiService::class)
             ->getGateway();
     }
 
     public function testSaveGroup()
     {
-        $method = new ReflectionMethod('SyncOktaGroupsJob', 'saveGroup');
+        $method = new ReflectionMethod(SyncOktaGroupsJob::class, 'saveGroup');
         $method->setAccessible(true);
 
         // instantiate job to invoke method with
-        $job = Injector::inst()->get('SyncOktaGroupsJob');
+        $job = Injector::inst()->get(SyncOktaGroupsJob::class);
 
         // use mocked gateway to get a mocked group to use
         $response = $this->OktaService->getGroups();
@@ -54,7 +59,7 @@ class SyncOktaGroupsJobTest extends SapphireTest
         $args = [
             $response['Contents'][0],
             null,
-            false
+            false,
         ];
 
         // assume no filters for first test
@@ -79,11 +84,11 @@ class SyncOktaGroupsJobTest extends SapphireTest
 
     public function testCheckMatchesFilter()
     {
-        $method = new ReflectionMethod('SyncOktaGroupsJob', 'checkMatchesFilter');
+        $method = new ReflectionMethod(SyncOktaGroupsJob::class, 'checkMatchesFilter');
         $method->setAccessible(true);
 
         // instantiate job to invoke method with
-        $job = Injector::inst()->get('SyncOktaGroupsJob');
+        $job = Injector::inst()->get(SyncOktaGroupsJob::class);
 
         // use mocked gateway to get a mocked group to use
         $response = $this->OktaService->getGroups();
@@ -103,31 +108,39 @@ class SyncOktaGroupsJobTest extends SapphireTest
         $filters = OktaGroupFilter::get();
 
         // check if first mocked group matches one of our filters
-        $result = $method->invokeArgs($job, [
-            $response['Contents'][0],
-            $filters
-        ]);
+        $result = $method->invokeArgs(
+            $job,
+            [
+                $response['Contents'][0],
+                $filters,
+            ]
+        );
 
         // first filter should match this group
         $this->assertTrue($result);
 
         // check if second mocked group matches one of our filters
-        $result = $method->invokeArgs($job, [
-            $response['Contents'][1],
-            $filters
-        ]);
+        $result = $method->invokeArgs(
+            $job,
+            [
+                $response['Contents'][1],
+                $filters,
+            ]
+        );
 
         // second filter should match this group
         $this->assertTrue($result);
 
         // check if third mocked group matches one of our filters
-        $result = $method->invokeArgs($job, [
-            $response['Contents'][2],
-            $filters
-        ]);
+        $result = $method->invokeArgs(
+            $job,
+            [
+                $response['Contents'][2],
+                $filters,
+            ]
+        );
 
         // no filters should match this group
         $this->assertFalse($result);
     }
-
 }

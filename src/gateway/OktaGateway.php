@@ -1,12 +1,20 @@
 <?php
 
+namespace NZTA\OktaAPI\Gateway;
+
+use GuzzleHttp\Client;
+use Psr\Log\LoggerInterface;
+use SilverStripe\Core\Environment;
+use GuzzleHttp\Exception\ClientException;
+use SilverStripe\Core\Injector\Injector;
+use Exception;
+
 /**
  * This class is used as the gateway to the Okta API and handles the actual
  * requests made to the API.
  */
 class OktaGateway
 {
-
     /**
      * Hits the users API endpoint to get a list of users, using the given
      * limit and after parameters. If the statuses parameter is provided, it
@@ -15,16 +23,22 @@ class OktaGateway
      * @param int $limit
      * @param string $after
      * @param array $statuses
+     * @param int $lastUpdated
      *
      * @return array
+     * @throws Exception
      */
-    public function getUsers($limit, $after, $statuses)
+    public function getUsers($limit, $after, $statuses, $lastUpdated = null)
     {
         $statusParam = '';
         $afterParam = $after ? sprintf('&after=%s', $after) : '';
 
         if (count($statuses)) {
             $statusParam .= '&filter=';
+
+            if ($lastUpdated) {
+                $statusParam .= rawurlencode('(');
+            }
 
             // create the status filters and add to the filter parameter
             foreach ($statuses as $status) {
@@ -35,6 +49,15 @@ class OktaGateway
                     $statusParam .= rawurlencode(sprintf('status eq "%s"', $status));
                 }
             }
+
+            if ($lastUpdated) {
+                $statusParam .= rawurlencode(')');
+            }
+        }
+
+        if ($lastUpdated) {
+            $statusParam .= rawurlencode(' and lastUpdated gt "') . gmdate('Y-m-d\TH:i:s.000\Z', $lastUpdated);
+            $statusParam .= rawurlencode('"');
         }
 
         return $this->get(sprintf(
@@ -53,6 +76,7 @@ class OktaGateway
      * @param string $after
      *
      * @return array
+     * @throws Exception
      */
     public function getGroups($limit, $after)
     {
@@ -74,6 +98,7 @@ class OktaGateway
      * @param string $groupID
      *
      * @return array
+     * @throws Exception
      */
     public function getUsersFromGroup($limit, $after, $groupID)
     {
@@ -99,12 +124,12 @@ class OktaGateway
      */
     public function get($endpoint)
     {
-        $client = new GuzzleHttp\Client([
-            'base_uri' => SS_OKTA_GATEWAY_REST_URL,
-            'headers'  => [
-                'Authorization' => sprintf('SSWS %s', SS_OKTA_API_TOKEN),
-                'Content-Type'  => 'application/json',
-                'Accept'        => 'application/json'
+        $client = new Client([
+            'base_uri' => Environment::getEnv('SS_OKTA_GATEWAY_REST_URL'),
+            'headers' => [
+                'Authorization' => sprintf('SSWS %s', Environment::getEnv('SS_OKTA_API_TOKEN')),
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
             ]
         ]);
 
@@ -117,7 +142,7 @@ class OktaGateway
             if ($statusCode === 200) {
                 return [
                     'Contents' => $response->getBody()->getContents(),
-                    'Headers'  => $response->getHeaders()
+                    'Headers' => $response->getHeaders()
                 ];
             } else {
                 throw new Exception(sprintf(
@@ -127,26 +152,24 @@ class OktaGateway
                 ));
             }
 
-        } catch (GuzzleHttp\Exception\ClientException $e) {
-            SS_Log::log(
+        } catch (ClientException $e) {
+            $this->getLogger()->error(
                 sprintf(
                     'Error in OktaGateway::call(%s). %s',
                     $endpoint,
                     $e->getMessage()
                 ),
-                SS_Log::ERR,
                 [
                     'Body' => $e
                 ]
             );
-        } catch (Exeception $e) {
-            SS_Log::log(
+        } catch (Exception $e) {
+            $this->getLogger()->error(
                 sprintf(
                     'Error in OktaGateway::call(%s). %s',
                     $endpoint,
                     $e->getMessage()
                 ),
-                SS_Log::ERR,
                 [
                     'Body' => $e
                 ]
@@ -156,4 +179,13 @@ class OktaGateway
         return null;
     }
 
+    /**
+     * Get a logger
+     *
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        return Injector::inst()->get(LoggerInterface::class);
+    }
 }
