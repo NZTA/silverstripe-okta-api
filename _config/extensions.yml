@@ -1,13 +1,10 @@
 ---
-Name: extensionsconfig-okta-api
-After:
-  - 'framework/*'
-  - 'cms/*'
+Name: oktaApiExtenstion
 ---
-Member:
+SilverStripe\Security\Member:
   extensions:
-    - OktaProfileMemberExtension
+    - NZTA\OktaAPI\Extensions\OktaProfileMemberExtension
 
-Group:
+SilverStripe\Security\Group:
   extensions:
-    - OktaGroupExtension
+    - NZTA\OktaAPI\Extensions\OktaGroupExtension

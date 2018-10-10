@@ -1,4 +1,13 @@
 <?php
+
+namespace NZTA\OktaAPI\Jobs;
+
+use Psr\Log\LoggerInterface;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Injector\Injector;
+use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
+use Symbiote\QueuedJobs\Services\QueuedJob;
+
 /**
  * This is being used to provide basic rescheduling of the current job and
  * ability to define a list of additional jobs that can be queued once this
@@ -64,7 +73,6 @@ abstract class AbstractOktaSyncJob extends AbstractQueuedJob implements QueuedJo
         $jobs = Config::inst()->get($class, 'additional_job_list');
 
         if (count($jobs) > 0) {
-
             foreach ($jobs as $job) {
                 $jobObj = Injector::inst()->get($job);
                 $scheduleTime = (isset($jobObj->schedule_after)) ? $jobObj->schedule_after : 30;
@@ -89,4 +97,13 @@ abstract class AbstractOktaSyncJob extends AbstractQueuedJob implements QueuedJo
         $this->isComplete = true;
     }
 
+    /**
+     * Get a logger
+     *
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        return Injector::inst()->get(LoggerInterface::class);
+    }
 }

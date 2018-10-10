@@ -1,0 +1,6 @@
+SilverStripe\Core\Injector\Injector:
+  Psr\SimpleCache\CacheInterface.OktaService:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: OktaService
+      defaultLifetime: 86400

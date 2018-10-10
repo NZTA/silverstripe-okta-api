@@ -1,5 +1,18 @@
 <?php
 
+namespace NZTA\OktaAPI\Jobs;
+
+use DateTime;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Convert;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\ORM\DB;
+use SilverStripe\ORM\Queries\SQLDelete;
+use SilverStripe\ORM\Queries\SQLInsert;
+use SilverStripe\Security\Member;
+use Symbiote\QueuedJobs\Services\QueuedJob;
+use NZTA\OktaAPI\Services\OktaService;
+
 class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
 {
 
@@ -31,7 +44,7 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
      * @var array
      */
     private static $dependencies = [
-        'OktaService' => '%$OktaService',
+        'OktaService' => '%$' . OktaService::class,
     ];
 
     /**
@@ -94,9 +107,8 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
 
         // just a heads up to help alert website administrators when larger amounts of users are being deleted
         if ($deletedUsersCount > Config::inst()->get('SyncOktaUsersJob', 'deleted_warning_threshold')) {
-            SS_Log::log(
-                sprintf('Warning: The SyncOktaUsersJob has deleted %s users.', $deletedUsersCount),
-                SS_Log::WARN
+            $this->getLogger()->warning(
+                sprintf('Warning: The SyncOktaUsersJob has deleted %s users.', $deletedUsersCount)
             );
         }
 
@@ -234,14 +246,12 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
 
                 // execute the INSERT statement
                 $insert->execute();
-
-            } catch (Exception $e) {
-                SS_Log::log(
+            } catch (\Exception $e) {
+                $this->getLogger()->error(
                     sprintf(
                         'Error occurred attempting to insert users in SyncOktaUsersJob. %s',
                         $e->getMessage()
-                    ),
-                    SS_Log::ERR
+                    )
                 );
             }
         }
@@ -310,14 +320,12 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
             try {
                 // run the UPDATE statement
                 DB::query($sql);
-
-            } catch (Exception $e) {
-                SS_Log::log(
+            } catch (\Exception $e) {
+                $this->getLogger()->error(
                     sprintf(
                         'Error occurred attempting to update users in SyncOktaUsersJob. %s',
                         $e->getMessage()
-                    ),
-                    SS_Log::ERR
+                    )
                 );
             }
         }
@@ -348,14 +356,12 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
             try {
                 // execute DELETE statement
                 $delete->execute();
-
-            } catch (Exception $e) {
-                SS_Log::log(
+            } catch (\Exception $e) {
+                $this->getLogger()->error(
                     sprintf(
                         'Error occurred attempting to delete users in SyncOktaUsersJob. %s',
                         $e->getMessage()
-                    ),
-                    SS_Log::ERR
+                    )
                 );
             }
         }
@@ -389,5 +395,4 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
 
         return $value;
     }
-
 }

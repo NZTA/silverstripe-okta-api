@@ -1,5 +1,10 @@
 <?php
 
+namespace NZTA\OktaAPI\Model;
+
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Forms\FieldList;
+
 class OktaGroupFilter extends DataObject
 {
 
@@ -18,6 +23,11 @@ class OktaGroupFilter extends DataObject
         'Filter',
         'Value',
     ];
+
+    /**
+     * @var string
+     */
+    private static $table_name = "OktaGroupFilter";
 
     /**
      * @return FieldList
@@ -39,5 +49,4 @@ class OktaGroupFilter extends DataObject
 
         return $fields;
     }
-
 }
