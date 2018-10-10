@@ -6,6 +6,9 @@ from Okta into your SilverStripe database.
 Documentation for the Okta Users API can be found [here](http://developer.okta.com/docs/api/resources/users.html)
 Documentation for the Okta Groups API can be found [here](https://developer.okta.com/docs/api/resources/groups.html)
 
+## Requirements
+SilverStripe 3.x
+
 ## Features
 
  * Queued job to sync users from Okta into SilverStripe
