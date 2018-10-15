@@ -45,11 +45,11 @@ class MockOktaApiService
         $gateway = Phake::mock(OktaGateway::class);
 
         Phake::when($gateway)
-            ->getUsers($this->limit, '', $this->statuses)
+            ->getUsers($this->limit, '', $this->statuses, null)
             ->thenReturn($this->getMockResponseGetUsers());
 
         Phake::when($gateway)
-            ->getUsers($this->limit, $this->after, $this->statuses)
+            ->getUsers($this->limit, $this->after, $this->statuses, null)
             ->thenReturn($this->getMockResponseGetUsers($this->after));
 
         Phake::when($gateway)

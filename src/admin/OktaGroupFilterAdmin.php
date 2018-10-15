@@ -3,6 +3,7 @@
 namespace NZTA\OktaAPI\Admin;
 
 use SilverStripe\Admin\ModelAdmin;
+use NZTA\OktaAPI\Model\OktaGroupFilter;
 
 class OktaGroupFilterAdmin extends ModelAdmin
 {
@@ -20,7 +21,7 @@ class OktaGroupFilterAdmin extends ModelAdmin
      * @var array
      */
     private static $managed_models = [
-        'OktaGroupFilter',
+        OktaGroupFilter::class,
     ];
 
 }

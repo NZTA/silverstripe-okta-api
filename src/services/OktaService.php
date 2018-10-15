@@ -272,7 +272,7 @@ class OktaService
 
         // parse the "Link" header
         if ($linkHeader) {
-            $links = GuzzleHttp\Psr7\parse_header($linkHeader);
+            $links = \GuzzleHttp\Psr7\parse_header($linkHeader);
 
             // try and find the "rel=next" link
             foreach ($links as $link) {

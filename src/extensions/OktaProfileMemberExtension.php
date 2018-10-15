@@ -16,6 +16,7 @@ use SilverStripe\Core\Convert;
  */
 class OktaProfileMemberExtension extends DataExtension
 {
+
     /**
      * @var array
      */
@@ -43,7 +44,7 @@ class OktaProfileMemberExtension extends DataExtension
         'DeskNumber' => 'Varchar(10)',
         'Location' => 'Varchar(255)',
     ];
-    
+
     /**
      * @param FieldList $fields
      */

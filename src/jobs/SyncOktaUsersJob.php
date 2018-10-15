@@ -3,15 +3,16 @@
 namespace NZTA\OktaAPI\Jobs;
 
 use DateTime;
-use SilverStripe\Core\Config\Config;
-use SilverStripe\Core\Convert;
-use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\DB;
+use SilverStripe\Core\Convert;
+use SilverStripe\Security\Member;
+use SilverStripe\Core\Config\Config;
+use NZTA\OktaAPI\Services\OktaService;
 use SilverStripe\ORM\Queries\SQLDelete;
 use SilverStripe\ORM\Queries\SQLInsert;
-use SilverStripe\Security\Member;
+use SilverStripe\Core\Injector\Injector;
 use Symbiote\QueuedJobs\Services\QueuedJob;
-use NZTA\OktaAPI\Services\OktaService;
+use NZTA\OktaAPI\Extensions\OktaProfileMemberExtension;
 
 class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
 {
@@ -78,10 +79,10 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
         // make an api call to get the list of users from okta
         $users = Injector::inst()
             ->get('OktaService')
-            ->getAllUsers(100, Config::inst()->get('SyncOktaUsersJob', 'statuses_to_sync'));
+            ->getAllUsers(100, Config::inst()->get(SyncOktaUsersJob::class, 'statuses_to_sync'));
 
         // get the member unique identifier field
-        $uniqueField = Config::inst()->get('OktaService', 'member_unique_identifier');
+        $uniqueField = Config::inst()->get(OktaService::class, 'member_unique_identifier');
 
         // decide which users need to be inserted, updated or deleted
         $categories = $this->splitUsersIntoCategories($users, $uniqueField);
@@ -106,7 +107,7 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
         ));
 
         // just a heads up to help alert website administrators when larger amounts of users are being deleted
-        if ($deletedUsersCount > Config::inst()->get('SyncOktaUsersJob', 'deleted_warning_threshold')) {
+        if ($deletedUsersCount > Config::inst()->get(SyncOktaUsersJob::class, 'deleted_warning_threshold')) {
             $this->getLogger()->warning(
                 sprintf('Warning: The SyncOktaUsersJob has deleted %s users.', $deletedUsersCount)
             );
@@ -130,9 +131,9 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
     private function paginateBulkSqlQueries($data, $queryType, $uniqueField = null)
     {
         if ($queryType == 'insert') {
-            $limit = Config::inst()->get('SyncOktaUsersJob', 'bulk_insert_pagination_limit');
+            $limit = Config::inst()->get(SyncOktaUsersJob::class, 'bulk_insert_pagination_limit');
         } elseif ($queryType == 'update') {
-            $limit = Config::inst()->get('SyncOktaUsersJob', 'bulk_update_pagination_limit');
+            $limit = Config::inst()->get(SyncOktaUsersJob::class, 'bulk_update_pagination_limit');
         }
 
         while (count($data) > 0) {
@@ -177,7 +178,7 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
         $currentIds = $oktaMembers->column($uniqueField);
 
         // get okta mapped unique id
-        $fieldMapping = Config::inst()->get('OktaProfileMemberExtension', 'okta_ss_member_fields_name_map');
+        $fieldMapping = Config::inst()->get(OktaProfileMemberExtension::class, 'okta_ss_member_fields_name_map');
         $oktaUniqueField = $fieldMapping[$uniqueField];
 
         // put users into the category that relates
@@ -224,7 +225,7 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
         if (count($users) > 0) {
             $insert = new SQLInsert('Member');
 
-            $fields = Config::inst()->get('OktaProfileMemberExtension', 'okta_ss_member_fields_name_map');
+            $fields = Config::inst()->get(OktaProfileMemberExtension::class, 'okta_ss_member_fields_name_map');
 
             try {
                 // add row of data to insert for each user
@@ -275,7 +276,7 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
             $sql = 'UPDATE Member SET ';
 
             // define DB to okta mappings
-            $updateFields = Config::inst()->get('OktaProfileMemberExtension', 'okta_ss_member_fields_name_map');
+            $updateFields = Config::inst()->get(OktaProfileMemberExtension::class, 'okta_ss_member_fields_name_map');
 
             // create the SET and CASE statements
             foreach ($updateFields as $updateField => $profileKey) {
@@ -285,7 +286,7 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
                 $caseStatement = sprintf('CASE %s ', $uniqueField);
 
                 // get the okta key for the unique identifier
-                $fieldMapping = Config::inst()->get('OktaProfileMemberExtension', 'okta_ss_member_fields_name_map');
+                $fieldMapping = Config::inst()->get(OktaProfileMemberExtension::class, 'okta_ss_member_fields_name_map');
                 $oktaUniqueField = $fieldMapping[$uniqueField];
 
                 // create a WHEN statement for each user
@@ -386,8 +387,10 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
 
         // we are going to assume there can only be 1 level deep
         if ($oktaFieldPartsCount == 2) {
-            $value = isset($user->$oktaFieldParts[0]->$oktaFieldParts[1])
-                ? Convert::raw2sql($user->$oktaFieldParts[0]->$oktaFieldParts[1])
+            $part0 = $oktaFieldParts[0];
+            $part1 = $oktaFieldParts[1];
+            $value = isset($user->$part0->$part1)
+                ? Convert::raw2sql($user->$part0->$part1)
                 : '';
         } elseif ($oktaFieldPartsCount == 1) {
             $value = isset($user->$oktaFieldParts[0]) ? Convert::raw2sql($user->$oktaFieldParts[0]) : '';
