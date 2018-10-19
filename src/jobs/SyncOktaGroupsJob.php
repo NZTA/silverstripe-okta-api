@@ -166,12 +166,15 @@ class SyncOktaGroupsJob extends AbstractOktaSyncJob implements QueuedJob
 
             // assume only two levels deep for filtering
             if ($partsCount == 2) {
-                $groupValue = isset($group->$filterKeyParts[0]->$filterKeyParts[1])
-                    ? $group->$filterKeyParts[0]->$filterKeyParts[1]
+                $part1 = $filterKeyParts[0];
+                $part2 =$filterKeyParts[1];
+                $groupValue = isset($group->$part1->$part2)
+                    ? $group->$part1->$part2
                     : null;
             } elseif ($partsCount == 1) {
-                $groupValue = isset($group->$filterKeyParts[0])
-                    ? $group->$filterKeyParts[0]
+                $part1 = $filterKeyParts[0];
+                $groupValue = isset($group->$part1)
+                    ? $group->$part1
                     : null;
             }
 
