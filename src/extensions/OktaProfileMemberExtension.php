@@ -1,5 +1,15 @@
 <?php
 
+namespace NZTA\OktaAPI\Extensions;
+
+use SilverStripe\ORM\DataExtension;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\CheckboxField_Readonly;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\LiteralField;
+use SilverStripe\Core\Convert;
+
 /**
  * This class is responsible for adding Okta specific data to Members.
  * Class OktaProfileMemberExtension
@@ -11,24 +21,28 @@ class OktaProfileMemberExtension extends DataExtension
      * @var array
      */
     private static $okta_ss_member_fields_name_map = [
-        'FirstName'             => 'profile.firstName',
-        'Surname'               => 'profile.lastName',
-        'Email'                 => 'profile.email',
-        'PrimaryPhone'          => 'profile.primaryPhone',
-        'JobTitle'              => 'profile.title',
+        'FirstName' => 'profile.firstName',
+        'Surname' => 'profile.lastName',
+        'Email' => 'profile.email',
+        'PrimaryPhone' => 'profile.primaryPhone',
+        'JobTitle' => 'profile.title',
         'EncodedProfilePicture' => 'profile.thumbnailPhoto',
-        'LastEdited'            => 'lastUpdated'
+        'LastEdited' => 'lastUpdated',
+        'DeskNumber' => 'profile.DeskNumber',
+        'Location' => 'profile.Location',
     ];
 
     /**
      * @var array
      */
     private static $db = [
-        'JobTitle'              => 'Varchar(100)',
-        'PrimaryPhone'          => 'Varchar',
-        'OktaStatus'            => 'ENUM("Active,Password_expired,Locked_out,Recovery", "Active")',
-        'IsOktaMember'          => 'Boolean',
-        'EncodedProfilePicture' => 'Text'
+        'JobTitle' => 'Varchar(100)',
+        'PrimaryPhone' => 'Varchar',
+        'OktaStatus' => 'Enum("Active,Password_expired,Locked_out,Recovery", "Active")',
+        'IsOktaMember' => 'Boolean',
+        'EncodedProfilePicture' => 'Text',
+        'DeskNumber' => 'Varchar(10)',
+        'Location' => 'Varchar(255)',
     ];
 
     /**
@@ -73,5 +87,4 @@ class OktaProfileMemberExtension extends DataExtension
             ? sprintf('data:image/jpg;base64,%s', Convert::raw2sql($encodedProfilePicture))
             : '';
     }
-
 }

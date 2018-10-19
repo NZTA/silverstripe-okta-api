@@ -1,5 +1,14 @@
 <?php
 
+namespace NZTA\OktaAPI\Jobs;
+
+use NZTA\OktaAPI\Model\OktaGroupFilter;
+use SilverStripe\ORM\DataList;
+use SilverStripe\ORM\Queries\SQLDelete;
+use SilverStripe\Security\Group;
+use Symbiote\QueuedJobs\Services\QueuedJob;
+use NZTA\OktaAPI\Services\OktaService;
+
 class SyncOktaGroupsJob extends AbstractOktaSyncJob implements QueuedJob
 {
 
@@ -12,7 +21,7 @@ class SyncOktaGroupsJob extends AbstractOktaSyncJob implements QueuedJob
      * @var array
      */
     private static $dependencies = [
-        'OktaService' => '%$OktaService',
+        'OktaService' => '%$' . OktaService::class,
     ];
 
     /**
@@ -46,6 +55,7 @@ class SyncOktaGroupsJob extends AbstractOktaSyncJob implements QueuedJob
      * be removed from the queue.
      *
      * @return void
+     * @throws \Exception
      */
     public function process()
     {
@@ -61,6 +71,7 @@ class SyncOktaGroupsJob extends AbstractOktaSyncJob implements QueuedJob
      * save all the groups.
      *
      * @return void
+     * @throws \Exception
      */
     private function syncOktaGroups()
     {
@@ -102,6 +113,7 @@ class SyncOktaGroupsJob extends AbstractOktaSyncJob implements QueuedJob
      * @param boolean $hasFilters Is there any filters?
      *
      * @return boolean
+     * @throws \Exception
      */
     private function saveGroup($group, $filters, $hasFilters)
     {
@@ -139,6 +151,7 @@ class SyncOktaGroupsJob extends AbstractOktaSyncJob implements QueuedJob
      * @param DataList $filters
      *
      * @return boolean
+     * @throws \Exception
      */
     private function checkMatchesFilter($group, $filters)
     {
@@ -153,12 +166,15 @@ class SyncOktaGroupsJob extends AbstractOktaSyncJob implements QueuedJob
 
             // assume only two levels deep for filtering
             if ($partsCount == 2) {
-                $groupValue = isset($group->$filterKeyParts[0]->$filterKeyParts[1])
-                    ? $group->$filterKeyParts[0]->$filterKeyParts[1]
+                $part1 = $filterKeyParts[0];
+                $part2 =$filterKeyParts[1];
+                $groupValue = isset($group->$part1->$part2)
+                    ? $group->$part1->$part2
                     : null;
             } elseif ($partsCount == 1) {
-                $groupValue = isset($group->$filterKeyParts[0])
-                    ? $group->$filterKeyParts[0]
+                $part1 = $filterKeyParts[0];
+                $groupValue = isset($group->$part1)
+                    ? $group->$part1
                     : null;
             }
 
@@ -214,18 +230,16 @@ class SyncOktaGroupsJob extends AbstractOktaSyncJob implements QueuedJob
                             'Deleted %d groups',
                             $toDeleteCount
                         ));
-                    } catch (Exception $e) {
-                        SS_Log::log(
+                    } catch (\Exception $e) {
+                        $this->getLogger()->error(
                             sprintf(
                                 'Error occurred attempting to delete users in SyncOktaGroupsJob. %s',
                                 $e->getMessage()
-                            ),
-                            SS_Log::ERR
+                            )
                         );
                     }
                 }
             }
         }
     }
-
 }

@@ -1,5 +1,12 @@
 <?php
 
+namespace NZTA\OktaAPI\Services;
+
+use NZTA\OktaAPI\Gateway\OktaGateway;
+use Psr\SimpleCache\CacheInterface;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Injector\Injector;
+
 /**
  * A service class used to interact with the Okta API via an {@link OktaGateway}
  * dependency. This class is used to format the data back into SilverStripe
@@ -41,7 +48,7 @@ class OktaService
     private static $member_unique_identifier = 'Email';
 
     /**
-     * @var OktaService
+     * @var OktaGateway
      */
     public $OktaGateway;
 
@@ -49,7 +56,7 @@ class OktaService
      * @var array
      */
     private static $dependencies = [
-        'OktaGateway' => '%$OktaGateway'
+        'OktaGateway' =>  '%$' . OktaGateway::class,
     ];
 
     /**
@@ -57,16 +64,18 @@ class OktaService
      *
      * @param int $limit
      * @param array $statuses
+     * @param int $lastUpdated
      *
      * @return array
+     * @throws \Exception
      */
-    public function getAllUsers($limit = 100, $statuses = [])
+    public function getAllUsers($limit = 100, $statuses = [], $lastUpdated = null)
     {
         $data = [];
         $after = '';
 
         while (!is_null($after)) {
-            $usersData = $this->getUsers($limit, $after, $statuses);
+            $usersData = $this->getUsers($limit, $after, $statuses, $lastUpdated);
 
             // this returns null if request fails
             if (is_array($usersData)) {
@@ -88,23 +97,22 @@ class OktaService
      * @param int $limit
      * @param string $after
      * @param array $statuses
+     * @param int $lastUpdated
      *
      * @return array
+     * @throws \Exception
      */
-    public function getUsers($limit = 100, $after = '', $statuses = [])
+    public function getUsers($limit = 100, $after = '', $statuses = [], $lastUpdated = null)
     {
         // get the cache for this service
-        $cache = SS_Cache::factory('OktaService', 'Output', [
-            'automatic_serialization' => true,
-            'lifetime'                => Config::inst()->get('OktaService', 'users_cache_lifetime')
-        ]);
+        $cache = Injector::inst()->get(CacheInterface::class . '.OktaService');
 
         // base cache key on group id and limit specified
-        $cacheKey = md5(sprintf('getUsers-%d-%s-%s', $limit, $after, implode('-', $statuses)));
+        $cacheKey = md5(sprintf('getUsers-%d-%s-%s-%d', $limit, $after, implode('-', $statuses), $lastUpdated));
 
         // attempt to retrieve ArrayList of posts from cache
-        if (!($response = $cache->load($cacheKey))) {
-            $response = $this->OktaGateway->getUsers($limit, $after, $statuses);
+        if (!($response = $cache->get($cacheKey))) {
+            $response = $this->OktaGateway->getUsers($limit, $after, $statuses, $lastUpdated);
 
             if (!is_array($response)) {
                 return null;
@@ -113,7 +121,7 @@ class OktaService
             // decode the json data before storing into the cache
             $response['Contents'] = json_decode($response['Contents']);
 
-            $cache->save($response, $cacheKey);
+            $cache->set($cacheKey, $response, Config::inst()->get('OktaService', 'users_cache_lifetime'));
         }
 
         return $response;
@@ -126,6 +134,7 @@ class OktaService
      * @param integer $limit
      *
      * @return array
+     * @throws \Exception
      */
     public function getAllGroups($limit = 100)
     {
@@ -155,20 +164,18 @@ class OktaService
      * @param string $after
      *
      * @return array
+     * @throws \Exception
      */
     public function getGroups($limit = 100, $after = '')
     {
         // get the cache for this service
-        $cache = SS_Cache::factory('OktaService', 'Output', [
-            'automatic_serialization' => true,
-            'lifetime'                => Config::inst()->get('OktaService', 'groups_cache_lifetime')
-        ]);
+        $cache = Injector::inst()->get(CacheInterface::class . '.OktaService');
 
         // base cache key on group id and limit specified
         $cacheKey = md5(sprintf('getGroups-%d-%s', $limit, $after));
 
         // attempt to retrieve ArrayList of groups from cache
-        if (!($response = $cache->load($cacheKey))) {
+        if (!($response = $cache->get($cacheKey))) {
             $response = $this->OktaGateway->getGroups($limit, $after);
 
             if (!is_array($response)) {
@@ -178,7 +185,7 @@ class OktaService
             // decode the json data before storing into the cache
             $response['Contents'] = json_decode($response['Contents']);
 
-            $cache->save($response, $cacheKey);
+            $cache->set($cacheKey, $response, Config::inst()->get('OktaService', 'groups_cache_lifetime'));
         }
 
         return $response;
@@ -222,14 +229,12 @@ class OktaService
      * @param string $groupID
      *
      * @return array
+     * @throws \Exception
      */
     public function getUsersFromGroup($limit, $after, $groupID)
     {
         // get the cache for this service
-        $cache = SS_Cache::factory('OktaService', 'Output', [
-            'automatic_serialization' => true,
-            'lifetime'                => Config::inst()->get('OktaService', 'group_users_cache_lifetime')
-        ]);
+        $cache = Injector::inst()->get(CacheInterface::class . '.OktaService');
 
         // base cache key on group id and limit specified
         $cacheKey = md5(sprintf('getUsersGroup-%d-%s-%s', $limit, $after, $groupID));
@@ -245,7 +250,7 @@ class OktaService
             // decode the json data before storing into the cache
             $response['Contents'] = json_decode($response['Contents'], true);
 
-            $cache->save($response, $cacheKey);
+            $cache->set($cacheKey, $response, Config::inst()->get('OktaService', 'group_users_cache_lifetime'));
         }
 
         return $response;
@@ -267,7 +272,7 @@ class OktaService
 
         // parse the "Link" header
         if ($linkHeader) {
-            $links = GuzzleHttp\Psr7\parse_header($linkHeader);
+            $links = \GuzzleHttp\Psr7\parse_header($linkHeader);
 
             // try and find the "rel=next" link
             foreach ($links as $link) {
@@ -288,5 +293,4 @@ class OktaService
 
         return $after;
     }
-
 }

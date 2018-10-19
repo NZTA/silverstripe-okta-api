@@ -1,5 +1,10 @@
 <?php
 
+namespace NZTA\OktaAPI\Tests;
+
+use Phake;
+use NZTA\OktaAPI\Gateway\OktaGateway;
+
 class MockOktaApiService
 {
     /**
@@ -37,22 +42,27 @@ class MockOktaApiService
      */
     public function getGateway()
     {
-        $gateway = Phockito::mock('OktaGateway');
+        $gateway = Phake::mock(OktaGateway::class);
 
-        Phockito::when($gateway->getUsers($this->limit, '', $this->statuses))
-            ->return($this->getMockResponse_getUsers());
+        Phake::when($gateway)
+            ->getUsers($this->limit, '', $this->statuses, null)
+            ->thenReturn($this->getMockResponseGetUsers());
 
-        Phockito::when($gateway->getUsers($this->limit, $this->after, $this->statuses))
-            ->return($this->getMockResponse_getUsers($this->after));
+        Phake::when($gateway)
+            ->getUsers($this->limit, $this->after, $this->statuses, null)
+            ->thenReturn($this->getMockResponseGetUsers($this->after));
 
-        Phockito::when($gateway->getGroups(anything(), anything()))
-            ->return($this->getMockResponse_getGroups());
+        Phake::when($gateway)
+            ->getGroups($this->limit, '')
+            ->thenReturn($this->getMockResponseGetGroups());
 
-        Phockito::when($gateway->getUsersFromGroup($this->limit, '', $this->groupID))
-            ->return($this->getMockResponse_getUsers());
+        Phake::when($gateway)
+            ->getUsersFromGroup($this->limit, '', $this->groupID)
+            ->thenReturn($this->getMockResponseGetUsers());
 
-        Phockito::when($gateway->getUsersFromGroup($this->limit, $this->after, $this->groupID))
-            ->return($this->getMockResponse_getUsers($this->after));
+        Phake::when($gateway)
+            ->getUsersFromGroup($this->limit, $this->after, $this->groupID)
+            ->thenReturn($this->getMockResponseGetUsers($this->after));
 
         return $gateway;
     }
@@ -64,7 +74,7 @@ class MockOktaApiService
      *
      * @return array
      */
-    public function getMockResponse_getUsers($after = '')
+    public function getMockResponseGetUsers($after = '')
     {
         $users = [
             [
@@ -179,7 +189,7 @@ class MockOktaApiService
      *
      * @return array
      */
-    public function getMockResponse_getGroups()
+    public function getMockResponseGetGroups()
     {
         $contents = [];
 
