@@ -21,28 +21,28 @@ class OktaProfileMemberExtension extends DataExtension
      * @var array
      */
     private static $okta_ss_member_fields_name_map = [
-        'FirstName' => 'profile.firstName',
-        'Surname' => 'profile.lastName',
-        'Email' => 'profile.email',
-        'PrimaryPhone' => 'profile.primaryPhone',
-        'JobTitle' => 'profile.title',
+        'FirstName'             => 'profile.firstName',
+        'Surname'               => 'profile.lastName',
+        'Email'                 => 'profile.email',
+        'PrimaryPhone'          => 'profile.primaryPhone',
+        'JobTitle'              => 'profile.title',
         'EncodedProfilePicture' => 'profile.thumbnailPhoto',
-        'LastEdited' => 'lastUpdated',
-        'DeskNumber' => 'profile.DeskNumber',
-        'Location' => 'profile.Location',
+        'LastEdited'            => 'lastUpdated',
+        'DeskNumber'            => 'profile.DeskNumber',
+        'Location'              => 'profile.Location',
     ];
 
     /**
      * @var array
      */
     private static $db = [
-        'JobTitle' => 'Varchar(100)',
-        'PrimaryPhone' => 'Varchar',
-        'OktaStatus' => 'Enum("Active,Password_expired,Locked_out,Recovery", "Active")',
-        'IsOktaMember' => 'Boolean',
+        'JobTitle'              => 'Varchar(100)',
+        'PrimaryPhone'          => 'Varchar',
+        'OktaStatus'            => 'Enum("Active,Password_expired,Locked_out,Recovery", "Active")',
+        'IsOktaMember'          => 'Boolean',
         'EncodedProfilePicture' => 'Text',
-        'DeskNumber' => 'Varchar(10)',
-        'Location' => 'Varchar(255)',
+        'DeskNumber'            => 'Varchar(10)',
+        'Location'              => 'Varchar(255)',
     ];
 
     /**
@@ -54,7 +54,7 @@ class OktaProfileMemberExtension extends DataExtension
             TextField::create('JobTitle', 'Job Title'),
             TextField::create('PrimaryPhone', 'Primary Phone'),
             DropdownField::create('OktaStatus', 'Okta Status', $this->owner->dbObject('OktaStatus')->enumValues()),
-            CheckboxField_Readonly::create('IsOktaMember', 'Is Okta Member?')
+            CheckboxField_Readonly::create('IsOktaMember', 'Is Okta Member?'),
         ];
 
         $encodedProfilePicture = $this->owner->EncodedProfilePicture;

@@ -78,7 +78,7 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
     {
         // make an api call to get the list of users from okta
         $users = Injector::inst()
-            ->get('OktaService')
+            ->get(OktaService::class)
             ->getAllUsers(100, Config::inst()->get(SyncOktaUsersJob::class, 'statuses_to_sync'));
 
         // get the member unique identifier field

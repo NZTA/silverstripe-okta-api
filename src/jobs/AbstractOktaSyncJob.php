@@ -7,6 +7,7 @@ use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
 use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
 use Symbiote\QueuedJobs\Services\QueuedJob;
+use Symbiote\QueuedJobs\Services\QueuedJobService;
 
 /**
  * This is being used to provide basic rescheduling of the current job and
@@ -55,7 +56,7 @@ abstract class AbstractOktaSyncJob extends AbstractQueuedJob implements QueuedJo
         $job = new $class();
 
         // queue up to go using the reschedule time length
-        singleton('QueuedJobService')
+        singleton(QueuedJobService::class)
             ->queueJob(
                 $job,
                 date('Y-m-d H:i:s', time() + Config::inst()->get($class, 'reschedule_time'))
@@ -77,7 +78,7 @@ abstract class AbstractOktaSyncJob extends AbstractQueuedJob implements QueuedJo
                 $jobObj = Injector::inst()->get($job);
                 $scheduleTime = (isset($jobObj->schedule_after)) ? $jobObj->schedule_after : 30;
 
-                singleton('QueuedJobService')
+                singleton(QueuedJobService::class)
                     ->queueJob(
                         $jobObj,
                         date('Y-m-d H:i:s', time() + $scheduleTime)

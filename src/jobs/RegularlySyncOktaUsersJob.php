@@ -55,7 +55,7 @@ class RegularlySyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
         $lastUpdated = (time() - 300);
 
         $users = Injector::inst()
-            ->get('OktaService')
+            ->get(OktaService::class)
             ->getAllUsers(100, self::$statuses_to_sync, $lastUpdated);
 
         $updateFields = Config::inst()->get('OktaProfileMemberExtension', 'okta_ss_member_fields_name_map');
