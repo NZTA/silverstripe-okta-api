@@ -2,13 +2,14 @@
 
 namespace NZTA\OktaAPI\Jobs;
 
-use SilverStripe\Core\Config\Config;
-use SilverStripe\Core\Convert;
-use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\DB;
+use SilverStripe\Core\Convert;
 use SilverStripe\Security\Member;
-use Symbiote\QueuedJobs\Services\QueuedJob;
+use SilverStripe\Core\Config\Config;
 use NZTA\OktaAPI\Services\OktaService;
+use SilverStripe\Core\Injector\Injector;
+use Symbiote\QueuedJobs\Services\QueuedJob;
+use NZTA\OktaAPI\Extensions\OktaProfileMemberExtension;
 
 class RegularlySyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
 {
@@ -58,18 +59,20 @@ class RegularlySyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
             ->get(OktaService::class)
             ->getAllUsers(100, self::$statuses_to_sync, $lastUpdated);
 
-        $updateFields = Config::inst()->get('OktaProfileMemberExtension', 'okta_ss_member_fields_name_map');
+        $updateFields = Config::inst()->get(OktaProfileMemberExtension::class, 'okta_ss_member_fields_name_map');
 
         foreach ($users as $user) {
             $sql = 'UPDATE Member SET ';
             $params = [];
 
-            foreach ($updateFields as $field => $map) {
-                $value = $this->getValueFromUser($user, $map);
+            if (is_array($updateFields)) {
+                foreach ($updateFields as $field => $map) {
+                    $value = $this->getValueFromUser($user, $map);
 
-                if (!empty($value)) {
-                    $sql .= $field . '=?,';
-                    $params[] = $this->getValueFromUser($user, $map);
+                    if (!empty($value)) {
+                        $sql .= $field . '=?,';
+                        $params[] = $this->getValueFromUser($user, $map);
+                    }
                 }
             }
 
@@ -111,11 +114,11 @@ class RegularlySyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
 
         // we are going to assume there can only be 1 level deep
         if ($oktaFieldPartsCount == 2) {
-            $value = isset($user->$oktaFieldParts[0]->$oktaFieldParts[1])
-                ? Convert::raw2sql($user->$oktaFieldParts[0]->$oktaFieldParts[1])
+            $value = isset($user->{$oktaFieldParts[0]}->{$oktaFieldParts[1]})
+                ? Convert::raw2sql($user->{$oktaFieldParts[0]}->{$oktaFieldParts[1]})
                 : '';
         } elseif ($oktaFieldPartsCount == 1) {
-            $value = isset($user->$oktaFieldParts[0]) ? Convert::raw2sql($user->$oktaFieldParts[0]) : '';
+            $value = isset($user->{$oktaFieldParts[0]}) ? Convert::raw2sql($user->{$oktaFieldParts[0]}) : '';
         }
 
         return $value;
