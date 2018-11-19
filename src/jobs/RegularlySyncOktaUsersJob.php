@@ -57,7 +57,7 @@ class RegularlySyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
 
         $users = Injector::inst()
             ->get(OktaService::class)
-            ->getAllUsers(100, self::$statuses_to_sync, $lastUpdated);
+            ->getAllUsers(100, self::$statuses_to_sync, null);
 
         $updateFields = Config::inst()->get(OktaProfileMemberExtension::class, 'okta_ss_member_fields_name_map');
 
@@ -77,8 +77,8 @@ class RegularlySyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
             }
 
             $sql  = rtrim($sql, ',');
-            $sql .= ' WHERE OktaID = ?';
-            $params[] = $user->id;
+            $sql .= ' WHERE Email = ?';
+            $params[] = $user->profile->email;
 
             try {
                 DB::prepared_query($sql, $params);
