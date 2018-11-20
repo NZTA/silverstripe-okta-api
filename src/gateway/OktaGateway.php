@@ -134,7 +134,20 @@ class OktaGateway
         ]);
 
         try {
-            $response = $client->get($endpoint);
+            $proxy = [];
+
+            if (Environment::getEnv('SS_OUTBOUND_PROXY') && Environment::getEnv('SS_OUTBOUND_PROXY_PORT')) {
+                $proxy = Environment::getEnv('SS_OUTBOUND_PROXY');
+                $proxyPort = Environment::getEnv('SS_OUTBOUND_PROXY_PORT');
+                $proxy = [
+                    'proxy' => [
+                        'http'  => sprintf('tcp://%s:%s', $proxy, $proxyPort), // Use this proxy with "http"
+                        'https' => sprintf('tcp://%s:%s', $proxy, $proxyPort), // Use this proxy with "https",
+                    ],
+                ];
+            }
+
+            $response = $client->get($endpoint, $proxy);
 
             // check what status code we get
             $statusCode = $response->getStatusCode();
