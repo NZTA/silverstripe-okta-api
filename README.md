@@ -7,7 +7,7 @@ Documentation for the Okta Users API can be found [here](http://developer.okta.c
 Documentation for the Okta Groups API can be found [here](https://developer.okta.com/docs/api/resources/groups.html)
 
 ## Requirements
-SilverStripe 3.x
+SilverStripe 4.x
 
 ## Features
 
