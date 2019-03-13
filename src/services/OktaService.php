@@ -240,7 +240,7 @@ class OktaService
         $cacheKey = md5(sprintf('getUsersGroup-%d-%s-%s', $limit, $after, $groupID));
 
         // attempt to retrieve ArrayList of posts from cache
-        if (!($response = $cache->load($cacheKey))) {
+        if (!($response = $cache->get($cacheKey))) {
             $response = $this->OktaGateway->getUsersFromGroup($limit, $after, $groupID);
 
             if (!is_array($response)) {
