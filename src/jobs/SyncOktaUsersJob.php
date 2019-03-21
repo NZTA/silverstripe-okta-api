@@ -393,7 +393,8 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
                 ? Convert::raw2sql($user->$part0->$part1)
                 : '';
         } elseif ($oktaFieldPartsCount == 1) {
-            $value = isset($user->$oktaFieldParts[0]) ? Convert::raw2sql($user->$oktaFieldParts[0]) : '';
+            $userKey = $oktaFieldParts[0];
+            $value =  isset($user->$userKey) ? Convert::raw2sql($user->$userKey) :  '';
         }
 
         return $value;
