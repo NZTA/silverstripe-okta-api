@@ -348,7 +348,7 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
 
             // add each id as a WHERE clause
             foreach ($userIds as $id) {
-                $delete->addWhere(sprintf("%s = '%s'", $uniqueField, $id));
+                $delete->addWhere(sprintf("%s = %s", $uniqueField, Convert::raw2sql($id, true)));
             }
 
             // split each WHERE by an OR
