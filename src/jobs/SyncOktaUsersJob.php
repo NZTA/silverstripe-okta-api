@@ -78,12 +78,11 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
     public function process()
     {
         // For each of the user group filters make an api call to get the list of users from okta
-        $allGroupIDs = OktaUserGroupFilter::get();
         $allUsers = [];
-        foreach ($allGroupIDs as $allGroupID) {
+        foreach (OktaUserGroupFilter::get() as $oktaUserGroupFilter) {
             $users = Injector::inst()
                 ->get(OktaService::class)
-                ->getAllUsersFromGroup(100, $allGroupID->OktaGroupID);
+                ->getAllUsersFromGroup(100, $oktaUserGroupFilter->OktaGroupID);
             foreach ($users as $user) {
                 $userEmail = strtolower($user['profile']['email']);
                 if (!array_key_exists($userEmail, $allUsers)) {
