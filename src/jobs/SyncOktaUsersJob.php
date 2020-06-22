@@ -3,6 +3,7 @@
 namespace NZTA\OktaAPI\Jobs;
 
 use DateTime;
+use NZTA\App\Model\OktaUserGroupFilter;
 use SilverStripe\ORM\DB;
 use SilverStripe\Core\Convert;
 use SilverStripe\Security\Member;
@@ -76,16 +77,25 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
      */
     public function process()
     {
-        // make an api call to get the list of users from okta
-        $users = Injector::inst()
-            ->get(OktaService::class)
-            ->getAllUsers(100, Config::inst()->get(SyncOktaUsersJob::class, 'statuses_to_sync'));
+        // For each of the user group filters make an api call to get the list of users from okta
+        $allUsers = [];
+        foreach (OktaUserGroupFilter::get() as $oktaUserGroupFilter) {
+            $users = Injector::inst()
+                ->get(OktaService::class)
+                ->getAllUsersFromGroup(100, $oktaUserGroupFilter->OktaGroupID);
+            foreach ($users as $user) {
+                $userEmail = strtolower($user['profile']['email']);
+                if (!array_key_exists($userEmail, $allUsers)) {
+                    $allUsers[$userEmail] = $user;
+                }
+            }
+        }
 
         // get the member unique identifier field
         $uniqueField = Config::inst()->get(OktaService::class, 'member_unique_identifier');
 
         // decide which users need to be inserted, updated or deleted
-        $categories = $this->splitUsersIntoCategories($users, $uniqueField);
+        $categories = $this->splitUsersIntoCategories($allUsers, $uniqueField);
 
         $usersToInsert = $categories['Insert'];
         $usersToUpdate = $categories['Update'];
@@ -183,6 +193,10 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
 
         // put users into the category that relates
         foreach ($users as $user) {
+            if (is_array($user)) {
+                $user = (object) $user;
+            }
+
             $userId = $this->getValueFromUser($user, $oktaUniqueField);
 
             // catch case if no user id field, shouldn't ever get here
@@ -389,6 +403,9 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
         if ($oktaFieldPartsCount == 2) {
             $part0 = $oktaFieldParts[0];
             $part1 = $oktaFieldParts[1];
+            if (is_array($user->$part0)) {
+                $user->$part0 = (object) $user->$part0;
+            }
             $value = isset($user->$part0->$part1)
                 ? Convert::raw2sql($user->$part0->$part1)
                 : '';

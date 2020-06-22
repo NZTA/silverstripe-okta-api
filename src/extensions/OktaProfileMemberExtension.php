@@ -2,10 +2,10 @@
 
 namespace NZTA\OktaAPI\Extensions;
 
+use SilverStripe\Forms\CheckboxField;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
-use SilverStripe\Forms\CheckboxField_Readonly;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Core\Convert;
@@ -54,7 +54,7 @@ class OktaProfileMemberExtension extends DataExtension
             TextField::create('JobTitle', 'Job Title'),
             TextField::create('PrimaryPhone', 'Primary Phone'),
             DropdownField::create('OktaStatus', 'Okta Status', $this->owner->dbObject('OktaStatus')->enumValues()),
-            CheckboxField_Readonly::create('IsOktaMember', 'Is Okta Member?'),
+            CheckboxField::create('IsOktaMember', 'Is Okta Member?'),
         ];
 
         $encodedProfilePicture = $this->owner->EncodedProfilePicture;
