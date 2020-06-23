@@ -141,8 +141,8 @@ class OktaGateway
                 $proxyPort = Environment::getEnv('SS_OUTBOUND_PROXY_PORT');
                 $proxy = [
                     'proxy' => [
-                        'http'  => sprintf('tcp://%s:%s', $proxy, $proxyPort), // Use this proxy with "http"
-                        'https' => sprintf('tcp://%s:%s', $proxy, $proxyPort), // Use this proxy with "https",
+                        'http'  => sprintf('%s:%s', $proxy, $proxyPort), // Use this proxy with "http"
+                        'https' => sprintf('%s:%s', $proxy, $proxyPort), // Use this proxy with "https",
                     ],
                 ];
             }
