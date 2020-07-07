@@ -59,6 +59,9 @@ class RegularlySyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
             ->get(OktaService::class)
             ->getAllUsers(100, self::$statuses_to_sync, $lastUpdated);
 
+        $updateCount = 0;
+        $errorCount = 0;
+
         $updateFields = Config::inst()->get(OktaProfileMemberExtension::class, 'okta_ss_member_fields_name_map');
 
         foreach ($users as $user) {
@@ -82,17 +85,36 @@ class RegularlySyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
 
             try {
                 DB::prepared_query($sql, $params);
+
+                $affected = DB::affected_rows();
+                if ($affected > 0) {
+                    $updateCount++;
+                    $msg = sprintf('Updated "%s"', $user->profile->email);
+                } else if ($affected === 0) {
+                    $msg = sprintf('No updates for "%s"', $user->profile->email);
+                } else {
+                    $errorCount++;
+                    $msg = sprintf('Error for "%s"', $user->profile->email);
+                }
+
+                $this->getLogger()->info($msg);
+                $this->addMessage($msg);
             } catch (\Exception $e) {
-                $this->getLogger()->error(
-                    sprintf(
-                        'Error occurred attempting to update users in RegularlySyncOktaUsersJob. %s',
-                        $e->getMessage()
-                    )
+                $errorCount++;
+
+                $msg = sprintf(
+                    'Error occurred attempting to update users in RegularlySyncOktaUsersJob. %s',
+                    $e->getMessage()
                 );
+                $this->getLogger()->error($msg);
+                $this->addMessage($msg);
             }
         }
 
-        $this->addMessage(sprintf('Updated %d users.', count($users)));
+        $this->addMessage('======================================================');
+        $this->addMessage(sprintf('Users from the API: %d', count($users)));
+        $this->addMessage(sprintf('Updated users: %d', $updateCount));
+        $this->addMessage(sprintf('Errors: %d', $errorCount));
 
         $this->scheduleNextExecution();
         $this->scheduleAdditionalJobs();
