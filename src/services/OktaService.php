@@ -268,7 +268,7 @@ class OktaService
     private function getAfterFromLinkHeader($data)
     {
         $after = null;
-        $linkHeader = (isset($data['Headers']['Link'])) ? $data['Headers']['Link'] : null;
+        $linkHeader = (isset($data['Headers']['link'])) ? $data['Headers']['link'] : null;
 
         // parse the "Link" header
         if ($linkHeader) {
