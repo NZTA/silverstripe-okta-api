@@ -9,6 +9,7 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\ORM\DB;
 use GuzzleHttp\Client;
 use SilverStripe\Core\Environment;
+use NZTA\OktaAPI\Extensions\OktaProfileMemberExtension;
 
 class OktaUpdateUserTask extends BuildTask
 {
@@ -34,8 +35,8 @@ class OktaUpdateUserTask extends BuildTask
     }
 
     private function processUser($user)
-    {
-        $updateFields = Config::inst()->get('OktaProfileMemberExtension', 'okta_ss_member_fields_name_map');
+    {        
+        $updateFields = Config::inst()->get(OktaProfileMemberExtension::class, 'okta_ss_member_fields_name_map');
 
         $sql = 'UPDATE Member SET ';
         $params = [];
