@@ -199,7 +199,7 @@ class OktaService
      *
      * @return array
      */
-    public function getAllUsersFromGroup($limit = 100, $groupID)
+    public function getAllUsersFromGroup($limit, $groupID)
     {
         $data = [];
         $after = '';
