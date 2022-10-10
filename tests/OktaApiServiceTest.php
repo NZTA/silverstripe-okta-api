@@ -32,7 +32,7 @@ class OktaApiServiceTest extends SapphireTest
     /**
      * To include Hamcrest
      */
-    public function setUpOnce()
+    public function setUpOnce(): void
     {
         parent::setUpOnce();
     }
@@ -40,7 +40,7 @@ class OktaApiServiceTest extends SapphireTest
     /**
      * Get mock service and {@link OktaService} for unit tests
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -144,7 +144,7 @@ class OktaApiServiceTest extends SapphireTest
 
         $toDeleteEmails = $categories['Delete'];
 
-        $this->assertContains('membertwo@example.org', $toDeleteEmails);
+        $this->assertStringContainsString('membertwo@example.org', $toDeleteEmails);
     }
 
     public function testGetOktaAllUsers()

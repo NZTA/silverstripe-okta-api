@@ -23,5 +23,4 @@ class OktaGroupFilterAdmin extends ModelAdmin
     private static $managed_models = [
         OktaGroupFilter::class,
     ];
-
 }

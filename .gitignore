@@ -1,1 +1,15 @@
 .idea
+.DS_Store
+.graphql-generated
+.phpunit.result.cache
+
+composer.lock
+
+_graphql
+app
+assets
+certs
+docker*
+resources
+silverstripe-cache
+vendor

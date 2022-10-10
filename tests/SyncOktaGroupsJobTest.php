@@ -31,7 +31,7 @@ class SyncOktaGroupsJobTest extends SapphireTest
      */
     private $mockOktaApiService;
 
-    public function setUpOnce()
+    public function setUpOnce(): void
     {
         parent::setUpOnce();
     }
@@ -39,7 +39,7 @@ class SyncOktaGroupsJobTest extends SapphireTest
     /**
      * Setting up the mocked Gateway for our OktaService
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -59,7 +59,7 @@ class SyncOktaGroupsJobTest extends SapphireTest
         $job = Injector::inst()->get(SyncOktaGroupsJob::class);
 
         // use mocked gateway to get a mocked group to use
-        $response = $this->OktaService->getGroups($this->mockOktaApiService->limit,'');
+        $response = $this->OktaService->getGroups($this->mockOktaApiService->limit, '');
 
         // use first mocked group
         $args = [
@@ -97,7 +97,7 @@ class SyncOktaGroupsJobTest extends SapphireTest
         $job = Injector::inst()->get(SyncOktaGroupsJob::class);
 
         // use mocked gateway to get a mocked group to use
-        $response = $this->OktaService->getGroups($this->mockOktaApiService->limit,'');
+        $response = $this->OktaService->getGroups($this->mockOktaApiService->limit, '');
 
         // setup some group filters
         $filter1 = new OktaGroupFilter();
