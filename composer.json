@@ -15,7 +15,8 @@
   "require": {
     "silverstripe/framework": "^4.2",
     "silverstripe/cms": "^4.2",
-    "symbiote/silverstripe-queuedjobs": "^4.2"
+    "symbiote/silverstripe-queuedjobs": "^4.2",
+    "guzzlehttp/guzzle": "^7.0"
   },
   "require-dev": {
     "phake/phake": "^3.1",
