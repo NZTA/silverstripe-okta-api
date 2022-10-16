@@ -90,7 +90,7 @@ class RegularlySyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
                 if ($affected > 0) {
                     $updateCount++;
                     $msg = sprintf('Updated "%s"', $user->profile->email);
-                } else if ($affected === 0) {
+                } elseif ($affected === 0) {
                     $msg = sprintf('No updates for "%s"', $user->profile->email);
                 } else {
                     $errorCount++;

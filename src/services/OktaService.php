@@ -199,7 +199,7 @@ class OktaService
      *
      * @return array
      */
-    public function getAllUsersFromGroup($limit = 100, $groupID)
+    public function getAllUsersFromGroup($limit, $groupID)
     {
         $data = [];
         $after = '';
@@ -272,7 +272,7 @@ class OktaService
 
         // parse the "Link" header
         if ($linkHeader) {
-            $links = \GuzzleHttp\Psr7\parse_header($linkHeader);
+            $links = \GuzzleHttp\Psr7\Header::parse($linkHeader);
 
             // try and find the "rel=next" link
             foreach ($links as $link) {

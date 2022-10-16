@@ -164,7 +164,6 @@ class OktaGateway
                     $response->getStatusDescription()
                 ));
             }
-
         } catch (ClientException $e) {
             $this->getLogger()->error(
                 sprintf(
