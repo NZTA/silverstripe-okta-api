@@ -33,7 +33,7 @@ class OktaGateway
         $statusParam = '';
         $afterParam = $after ? sprintf('&after=%s', $after) : '';
 
-        if (count($statuses)) {
+        if (count($statuses ?? [])) {
             $statusParam .= '&filter=';
 
             if ($lastUpdated) {

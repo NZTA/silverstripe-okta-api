@@ -84,7 +84,7 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
                 ->get(OktaService::class)
                 ->getAllUsersFromGroup(100, $oktaUserGroupFilter->OktaGroupID);
             foreach ($users as $user) {
-                $userEmail = strtolower($user['profile']['email']);
+                $userEmail = strtolower($user['profile']['email'] ?? '');
                 if (!array_key_exists($userEmail, $allUsers)) {
                     $allUsers[$userEmail] = $user;
                 }
@@ -140,6 +140,7 @@ class SyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
      */
     private function paginateBulkSqlQueries($data, $queryType, $uniqueField = null)
     {
+        $limit = 0;
         if ($queryType == 'insert') {
             $limit = Config::inst()->get(SyncOktaUsersJob::class, 'bulk_insert_pagination_limit');
         } elseif ($queryType == 'update') {

@@ -131,7 +131,7 @@ class RegularlySyncOktaUsersJob extends AbstractOktaSyncJob implements QueuedJob
         $value = '';
 
         // allow the ability to use nested fields
-        $oktaFieldParts = explode('.', $key);
+        $oktaFieldParts = explode('.', $key ?? '');
         $oktaFieldPartsCount = count($oktaFieldParts);
 
         // we are going to assume there can only be 1 level deep

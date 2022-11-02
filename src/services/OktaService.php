@@ -119,7 +119,7 @@ class OktaService
             }
 
             // decode the json data before storing into the cache
-            $response['Contents'] = json_decode($response['Contents']);
+            $response['Contents'] = json_decode($response['Contents'] ?? '');
 
             $cache->set($cacheKey, $response, Config::inst()->get('OktaService', 'users_cache_lifetime'));
         }
@@ -183,7 +183,7 @@ class OktaService
             }
 
             // decode the json data before storing into the cache
-            $response['Contents'] = json_decode($response['Contents']);
+            $response['Contents'] = json_decode($response['Contents'] ?? '');
 
             $cache->set($cacheKey, $response, Config::inst()->get('OktaService', 'groups_cache_lifetime'));
         }
@@ -248,7 +248,7 @@ class OktaService
             }
 
             // decode the json data before storing into the cache
-            $response['Contents'] = json_decode($response['Contents'], true);
+            $response['Contents'] = json_decode($response['Contents'] ?? '', true);
 
             $cache->set($cacheKey, $response, Config::inst()->get('OktaService', 'group_users_cache_lifetime'));
         }
@@ -279,7 +279,7 @@ class OktaService
                 if (isset($link[0]) && isset($link['rel']) && $link['rel'] == 'next') {
                     // found, so now extract the GET parameters, trimming off the surrounding angle brackets
                     $url = rtrim(ltrim($link[0], '<'), '>');
-                    $query = parse_url($url, PHP_URL_QUERY);
+                    $query = parse_url($url, PHP_URL_QUERY) ?? false;
 
                     // now extract the "after" parameter
                     if ($query !== false) {
