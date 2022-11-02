@@ -157,7 +157,7 @@ class SyncOktaGroupsJob extends AbstractOktaSyncJob implements QueuedJob
     {
         // check through each of the filters to see if any match the current group
         foreach ($filters as $filter) {
-            $filterKey = $filter->Filter;
+            $filterKey = $filter->Filter ?? '';
             $filterValue = $filter->Value;
 
             // provide ability to filter by a nested key

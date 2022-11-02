@@ -71,7 +71,7 @@ abstract class AbstractOktaSyncJob extends AbstractQueuedJob implements QueuedJo
     protected function scheduleAdditionalJobs()
     {
         $class = get_class($this);
-        $jobs = Config::inst()->get($class, 'additional_job_list');
+        $jobs = Config::inst()->get($class, 'additional_job_list') ?? [];
 
         if (count($jobs) > 0) {
             foreach ($jobs as $job) {

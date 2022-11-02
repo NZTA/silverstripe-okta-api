@@ -68,7 +68,7 @@ class OktaUpdateUserTask extends BuildTask
             $response = $client->get('users/' . $id);
 
             if ($response->getStatusCode() === 200) {
-                return json_decode($response->getBody()->getContents(), true);
+                return json_decode($response->getBody()->getContents() ?? '', true);
             }
         } catch (\Exception $e) {
             return null;
